@@ -2,6 +2,11 @@ from flask import Flask , request , jsonify
 
 app = Flask(__name__)
 
+recipes_list = [
+    {"name": "spaghetti", "ingredients": ["pasta", "tomato sauce", "cheese"]},
+    {"name": "pancakes", "ingredients": ["flour", "milk", "eggs", "sugar"]}
+]
+
 @app.route("/")
 def home():
     return "Welcome to Only Pans!"
@@ -14,9 +19,12 @@ def recipes():
     
     return "Here is a list of all recipes"
 
-@app.route("/recipe/<recipe_name>", methods=["GET"])
+@app.route("/recipes/<recipe_name>", methods=["GET"])
 def recipe(recipe_name):
-    return f"Showing details for {recipe_name} recipe"
+    for recipe in recipes_list:
+        if recipe ["name"].lower() ==  recipe_name.lower():
+            return jsonify(recipe)
+    return jsonify({"error":"Recipe not found"}) , 404
 
 @app.route("/add-recipe", methods=["POST"])
 def new_recipe():
@@ -26,14 +34,25 @@ def new_recipe():
         "recipe": data
     }) , 201
 
-@app.route("/edit-recipe/<recipe_name>", methods=["PUT"])
+@app.route("/recipes/<recipe_name>", methods=["PUT"])
 def edit_recipe(recipe_name):
-    data = request.json
-    return f"Admin:Updated {recipe_name} recipe to {data['name']}" , 200
+    data = request.get_json()
+    for recipe in recipes_list:
+        if recipe["name"].lower() == recipe_name.lower():
+            recipe.update(data)
+            return jsonify({"message": "Recipe updated!", "updated_recipe": recipe}), 200
+    return jsonify({"error": "Recipe not found"}) , 404
+        
 
-@app.route("/delete-recipe/<recipe_name>", methods=["DELETE"])
+@app.route("/recipes/<recipe_name>", methods=["DELETE"])
 def delete_recipe(recipe_name):
-    return f"Admin:Deleted {recipe_name} recipe" , 200
+    global recipes_list 
+    for recipe in recipes_list:
+        if recipe["name"].lower() == recipe_name.lower():
+            recipes_list.remove(recipe)
+            return jsonify({"message": f"Recipe '{recipe_name}' deleted successfully!"}), 200
+    
+    return jsonify({"error": "Recipe not found"}), 404
 
 if __name__ == "__main__":
     app.run(debug=True)
