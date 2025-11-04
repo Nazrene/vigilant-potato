@@ -1,10 +1,11 @@
 from flask import Flask , request , jsonify
 from flask_sqlalchemy import SQLAlchemy
-from models import db
+from models import db , Recipe
+import os
 
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///recipes.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(app.instance_path, 'recipes.db')}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
@@ -21,9 +22,28 @@ def home():
 def recipes():
     if request.method == "POST":
         data = request.get_json()
-        return jsonify({"message": "Recipe received", "recipe": data}), 201
-    
-    return "Here is a list of all recipes"
+        
+        if not data or "name" not in data or "ingredients" not in data: 
+            return jsonify({"error" : "Name and ingredients are required"}), 400
+        
+        new_recipe = Recipe(
+            name=data["name"]
+            ingredients=data["ingredients"]
+            instructions=data.get["instructions" , ""]
+        )
+
+        db.session.add(new_recipe)
+        db.session.commit()
+
+        return jsonify({
+            "message":f"Recipe '{new_recipe.name}' added successfully!" ,
+            "recipe": {
+                "id":new_recipe.id,
+                "name":new_recipe.name,
+                "ingredients":new_recipe.ingredients,
+                "instructions":new_recipe.instructions
+            }
+        }),201
 
 @app.route("/recipes/<recipe_name>", methods=["GET"])
 def recipe(recipe_name):
@@ -34,7 +54,7 @@ def recipe(recipe_name):
 
 @app.route("/add-recipe", methods=["POST"])
 def new_recipe():
-    data = request.get_json
+    data = request.get_json()
     return jsonify({
         "message": f"Recipe '{data['name']}' added suucessfully!" ,
         "recipe": data
