@@ -44,41 +44,34 @@ def recipes():
                 "instructions":new_recipe.instructions
             }
         }),201
-
-@app.route("/recipes/<recipe_name>", methods=["GET"])
-def recipe(recipe_name):
-    for recipe in recipes_list:
-        if recipe ["name"].lower() ==  recipe_name.lower():
-            return jsonify(recipe)
-    return jsonify({"error":"Recipe not found"}) , 404
-
-@app.route("/add-recipe", methods=["POST"])
-def new_recipe():
-    data = request.get_json()
-    return jsonify({
-        "message": f"Recipe '{data['name']}' added suucessfully!" ,
-        "recipe": data
-    }) , 201
-
-@app.route("/recipes/<recipe_name>", methods=["PUT"])
-def edit_recipe(recipe_name):
-    data = request.get_json()
-    for recipe in recipes_list:
-        if recipe["name"].lower() == recipe_name.lower():
-            recipe.update(data)
-            return jsonify({"message": "Recipe updated!", "updated_recipe": recipe}), 200
-    return jsonify({"error": "Recipe not found"}) , 404
-        
-
-@app.route("/recipes/<recipe_name>", methods=["DELETE"])
-def delete_recipe(recipe_name):
-    global recipes_list 
-    for recipe in recipes_list:
-        if recipe["name"].lower() == recipe_name.lower():
-            recipes_list.remove(recipe)
-            return jsonify({"message": f"Recipe '{recipe_name}' deleted successfully!"}), 200
     
-    return jsonify({"error": "Recipe not found"}), 404
+    recipes = Recipe.query.all()
+    recipes_list = [
+        {
+            "id": recipe.id,
+            "name": recipe.name,
+            "ingredients": recipe.ingredients,
+            "instructions": recipe.instructions
+        }
+        for recipe in recipes
+    ]
 
-if __name__ == "__main__":
-    app.run(debug=True)
+    return jsonify(recipes_list), 200
+
+@app.route("/recipes/<recipe_name>", methods=["GET", "PUT", "DELETE"])
+def recipe_detail(recipe_name):
+    recipe = Recipe.query.filter_by(name=recipe_name).first()
+
+    if not recipe:
+        return jsonify({"error": "Recipe not found"}) , 404
+    
+    if request.method == "GET":
+        return jsonify({
+            "id": recipe.id
+            "name": recipe.name 
+            "ingredients": recipe.ingredients
+            "instructions": recipe.instructions
+        }) , 200 
+    
+    if request.method == "PUT":
+        
