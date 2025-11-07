@@ -27,9 +27,9 @@ def recipes():
             return jsonify({"error" : "Name and ingredients are required"}), 400
         
         new_recipe = Recipe(
-            name=data["name"]
-            ingredients=data["ingredients"]
-            instructions=data.get["instructions" , ""]
+            name=data["name"],
+            ingredients=data["ingredients"],
+            instructions=data.get("instructions" , "")
         )
 
         db.session.add(new_recipe)
@@ -67,11 +67,33 @@ def recipe_detail(recipe_name):
     
     if request.method == "GET":
         return jsonify({
-            "id": recipe.id
-            "name": recipe.name 
-            "ingredients": recipe.ingredients
+            "id": recipe.id,
+            "name": recipe.name ,
+            "ingredients": recipe.ingredients,
             "instructions": recipe.instructions
-        }) , 200 
+    }) , 200 
     
     if request.method == "PUT":
-        
+        data = request.get_json()
+        recipe.name = data.get("name", recipe.name)
+        recipe.ingredients = data.get("ingredients", recipe.ingredients)
+        recipe.instructions = data.get("instructions", recipe.instructions)
+        db.session.commit()
+
+        return jsonify({
+            "message": f"Recipe '{recipe.name}' updated successfully!",
+            "recipe": {
+                "id": recipe.id,
+                "name": recipe.name,
+                "ingredients": recipe.ingredients,
+                "instructions": recipe.instructions
+            }
+        }) ,200
+    
+    if request.method == "DELETE":
+        db.session.delete(recipe)
+        db.session.commit()
+        return jsonify({"message": f"Recipe'{recipe_name}' deleted successfully!"}) ,200
+    
+if __name__ == "__main__":
+    app.run(debug=True)
