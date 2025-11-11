@@ -1,5 +1,6 @@
 from flask import Flask , request , jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from models import db , Recipe
 import os
 
@@ -8,11 +9,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(app.instance_path, 'recipes.db')}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
-
-recipes_list = [
-    {"name": "spaghetti", "ingredients": ["pasta", "tomato sauce", "cheese"]},
-    {"name": "pancakes", "ingredients": ["flour", "milk", "eggs", "sugar"]}
-]
+migrate = Migrate(app,db)
 
 @app.route("/")
 def home():

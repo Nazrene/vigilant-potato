@@ -14,12 +14,13 @@ class User(db.Model):
     reviews = db.relationship("Review", back_populates="author", cascade="all, delete-orphan")
 
 class Recipe(db.Model):
+    __tablename__ = "recipes"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, index=True)
     ingredients = db.Column(db.Text, nullable=False)
     instructions = db.Column(db.Text, nullable=False)
     image_url = db.Column(db.String(1024), nullable=True)
-    user_id = db.Column(db.Integer, db.Foreignkey("users.id"), nullable=False, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
 
     author = db.Relationship("User", back_populates="recipes")
     reviews = db.Relationship("Review", back_populates="recipe", cascade="all, delete-orphan")
