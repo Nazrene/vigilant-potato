@@ -13,6 +13,9 @@ class User(db.Model):
     recipes = db.relationship("Recipe", back_populates="author", cascade="all, delete-orphan")
     reviews = db.relationship("Review", back_populates="author", cascade="all, delete-orphan")
 
+    def __repr__(self):
+        return f"<User {self.id} - {self.username}>"
+
 class Recipe(db.Model):
     __tablename__ = "recipes"
     id = db.Column(db.Integer, primary_key=True)
@@ -22,8 +25,11 @@ class Recipe(db.Model):
     image_url = db.Column(db.String(1024), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
 
-    author = db.Relationship("User", back_populates="recipes")
-    reviews = db.Relationship("Review", back_populates="recipe", cascade="all, delete-orphan")
+    author = db.relationship("User", back_populates="recipes")
+    reviews = db.relationship("Review", back_populates="recipe", cascade="all, delete-orphan")
+    
+    def __repr__(self):
+        return f"<Recipe {self.id} - {self.name}>"
 
 class Review(db.Model):
     __tablename__ = "reviews"
@@ -33,9 +39,9 @@ class Review(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False, index=True)
 
-    author = db.Relationship("User", back_populates="reviews")
-    recipe = db.Relationship("Recipe", back_populates="review")
+    author = db.relationship("User", back_populates="reviews")
+    recipe = db.relationship("Recipe", back_populates="reviews")
 
 
     def __repr__(self):
-        return f"<Recipe {self.name}>"
+        return f"<Review {self.id} - Recipe {self.recipe_id}>"

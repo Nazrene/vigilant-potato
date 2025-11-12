@@ -92,5 +92,7 @@ def recipe_detail(recipe_name):
         db.session.commit()
         return jsonify({"message": f"Recipe'{recipe_name}' deleted successfully!"}) ,200
     
+from models import User, Recipe, Review
+    
 if __name__ == "__main__":
     app.run(debug=True)
